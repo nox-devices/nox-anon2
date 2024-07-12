@@ -1,5 +1,5 @@
 import { Page } from "playwright";
-import { linkedInCreatePost } from "./linkedin/linkedInCreatePost";
+import { linkedInCreatePost, sendMessage } from "./linkedin/linkedInCreatePost";
 import { instagramNavigateToMessages, getRecentNotification } from "./instagram/instagramMessage";
 import { amazonAddAirpodsToCart } from './amazon/amazonAddHeadphonesToCart'
 
@@ -24,7 +24,7 @@ export const APP_CONFIG: { [key: string]: AppConfig } = {
   },
   linkedin: {
     url: "https://www.linkedin.com",
-    action: linkedInCreatePost,
+    action: sendMessage,
   },
   // Add other apps here, for example:
   // twitter: {
