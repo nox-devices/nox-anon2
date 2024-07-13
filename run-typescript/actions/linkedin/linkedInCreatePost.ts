@@ -117,3 +117,39 @@ export const getRecentNotification = async (page: Page) => {
 
   console.log("Text content of the page:", textContent);
 };
+export const search = async (page: Page) => {
+  const searchKey = ""
+  const INSTAGRAM_MESSAGES_URL = `https://www.linkedin.com/search/results/all/?keywords=${searchKey}`;
+  console.log("Starting getRecentNotification function...");
+
+  console.log("Step 1: Navigating to Linkedin Notifications...");
+  await retryWithBackoff(async () => {
+    await page.goto(INSTAGRAM_MESSAGES_URL, { timeout: NETWORK_TIMEOUT });
+    console.log("Successfully navigated to Linkedin Notifications.");
+  });
+
+  await waitForNetworkIdle(page);
+  await waitForPageLoad(page);
+
+  const res = await page.locator(".search-results-container");
+  const textContent = await res.evaluate((container) => {
+    const getTextContentRecursively = (element) => {
+      let text = '';
+      element.childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          text += node.textContent;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          text += getTextContentRecursively(node);
+        }
+      });
+      return text;
+    };
+    return getTextContentRecursively(container);
+  });
+
+  console.log("Text content in the container:", textContent);
+
+};
+
+
+// search-results-container
