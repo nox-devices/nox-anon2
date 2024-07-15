@@ -47,3 +47,11 @@ export const getRecentNotification = async (page: Page) => {
 
   console.log("Text content of the page:", textContent);
 };
+
+
+export const instaSearch = async (page: Page) => {
+  const response = await page.request.get('https://www.instagram.com/web/search/topsearch/?query=sankalpa');
+  const data = await response.json();
+  console.log(data)
+  return data.users
+}

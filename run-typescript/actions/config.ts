@@ -1,6 +1,6 @@
 import { Page } from "playwright";
-import { linkedInCreatePost, sendMessage } from "./linkedin/linkedInCreatePost";
-import { instagramNavigateToMessages, getRecentNotification } from "./instagram/instagramMessage";
+import { linkedInCreatePost, sendMessage, linkedinSearch } from "./linkedin/linkedInCreatePost";
+import { instagramNavigateToMessages, getRecentNotification, instaSearch } from "./instagram/instagramMessage";
 import { amazonAddAirpodsToCart } from './amazon/amazonAddHeadphonesToCart'
 
 export const DEFAULT_APP: AppName = "instagram";
@@ -20,11 +20,11 @@ export const APP_CONFIG: { [key: string]: AppConfig } = {
   },
   instagram: {
     url: "https://www.instagram.com",
-    action: getRecentNotification,
+    action: instaSearch,
   },
   linkedin: {
     url: "https://www.linkedin.com",
-    action: sendMessage,
+    action: linkedinSearch,
   },
   // Add other apps here, for example:
   // twitter: {

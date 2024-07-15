@@ -117,7 +117,7 @@ export const getRecentNotification = async (page: Page) => {
 
   console.log("Text content of the page:", textContent);
 };
-export const search = async (page: Page) => {
+export const linkedinSearch = async (page: Page) => {
   const searchKey = ""
   const INSTAGRAM_MESSAGES_URL = `https://www.linkedin.com/search/results/all/?keywords=${searchKey}`;
   console.log("Starting getRecentNotification function...");
