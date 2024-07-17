@@ -1,5 +1,5 @@
 import { Page } from "playwright";
-import { waitForPageLoad, retryWithBackoff, takeScreenshot } from "../browserHelpers";
+import { waitForPageLoad, retryWithBackoff, takeScreenshot, waitForNetworkIdle } from "../browserHelpers";
 import { NETWORK_TIMEOUT } from "../config";
 
 const LINKEDIN_URL = "https://www.linkedin.com";
@@ -69,3 +69,87 @@ export const linkedInCreatePost = async (page: Page) => {
 
   console.log("LinkedIn post creation process completed.");
 };
+
+
+export const sendMessage = async (page: Page) => {
+  let username = ""
+  let message = ""
+  let firstName = ""
+
+  const INSTAGRAM_MESSAGES_URL = `https://www.linkedin.com/in/${username}/`;
+  console.log("Starting instagramNavigateToMessages function...");
+
+  console.log("Step 1: Navigating to Instagram Messages...");
+  await retryWithBackoff(async () => {
+    await page.goto(INSTAGRAM_MESSAGES_URL, { timeout: NETWORK_TIMEOUT });
+    console.log("Successfully navigated to Instagram Messages.");
+  });
+  await waitForNetworkIdle(page);
+  await waitForPageLoad(page);
+  await takeScreenshot(page, "linkedin", "7-after-clicking-post");
+  await page.getByRole('button', { name: `Message ${firstName}` }).click();
+  await waitForNetworkIdle(page);
+  await waitForPageLoad(page);
+  await takeScreenshot(page, "linkedin", "7-after-clicking-post");
+  await page.getByLabel('Write a message…').click();
+  await page.getByLabel('Write a message…').fill('test');
+  await page.locator('#ember179').click();
+}
+
+
+export const getRecentNotification = async (page: Page) => {
+  const INSTAGRAM_MESSAGES_URL = `https://www.linkedin.com/notifications/?filter=all`;
+  console.log("Starting getRecentNotification function...");
+
+  console.log("Step 1: Navigating to Linkedin Notifications...");
+  await retryWithBackoff(async () => {
+    await page.goto(INSTAGRAM_MESSAGES_URL, { timeout: NETWORK_TIMEOUT });
+    console.log("Successfully navigated to Linkedin Notifications.");
+  });
+
+  await waitForNetworkIdle(page);
+  await waitForPageLoad(page);
+
+  console.log("Step 2: Extracting text content...");
+  const textContent = await page.evaluate(() => {
+    return document.body.innerText;
+  });
+
+  console.log("Text content of the page:", textContent);
+};
+export const linkedinSearch = async (page: Page) => {
+  const searchKey = ""
+  const INSTAGRAM_MESSAGES_URL = `https://www.linkedin.com/search/results/all/?keywords=${searchKey}`;
+  console.log("Starting getRecentNotification function...");
+
+  console.log("Step 1: Navigating to Linkedin Notifications...");
+  await retryWithBackoff(async () => {
+    await page.goto(INSTAGRAM_MESSAGES_URL, { timeout: NETWORK_TIMEOUT });
+    console.log("Successfully navigated to Linkedin Notifications.");
+  });
+
+  await waitForNetworkIdle(page);
+  await waitForPageLoad(page);
+
+  const res = await page.locator(".search-results-container");
+  const textContent = await res.evaluate((container) => {
+    const getTextContentRecursively = (element) => {
+      let text = '';
+      element.childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          text += node.textContent;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          text += getTextContentRecursively(node);
+        }
+      });
+      return text;
+    };
+    return getTextContentRecursively(container);
+  });
+
+  console.log("Text content in the container:", textContent);
+
+};
+
+
+// search-results-container
