@@ -1,0 +1,54 @@
+Implementation Plan for Missing Actions:
+
+1. Uber: Book (pickup, dropoff, type) -> ID
+   - Create a new file `uberBook.ts` in the `actions/uber` directory.
+   - Implement a function that uses Playwright to interact with the Uber booking page, inputting the pickup, dropoff, and type parameters, and retrieving the booking ID.
+
+2. Uber: Check how far (ID) -> Obj
+   - Create a new file `uberCheckDistance.ts` in the `actions/uber` directory.
+   - Implement a function that uses the booking ID to check the status of the ride and returns an object with the distance and estimated time of arrival.
+
+3. Delta / United: Check_in (booking_reference, last_name) -> Success / Fail
+   - Create a new file `airlineCheckIn.ts` in the `actions/airlines` directory.
+   - Implement a function that uses Playwright to automate the check-in process on both Delta and United's websites using the booking reference and last name.
+
+4. Delta / United: Search_flights (origin, destination, departure_date, return_date, class) -> List
+   - Create a new file `airlineSearchFlights.ts` in the `actions/airlines` directory.
+   - Implement a function that searches for flights on both Delta and United's websites with the given parameters and returns a list of available flights.
+
+5. Instacart: Order (query)
+   - Create a new file `instacartOrder.ts` in the `actions/instacart` directory.
+   - Implement a function that uses Playwright to place an order on Instacart using the query parameter.
+
+For each of these actions, the `APP_CONFIG` object in `config.ts` will be updated to include the new actions, following the existing pattern:
+
+export const APP_CONFIG: { [key: string]: AppConfig } = {
+  // ... existing configurations ...
+  uber: {
+    url: "https://www.uber.com",
+    actions: {
+      book: uberBook,
+      checkDistance: uberCheckDistance,
+      // Add other Uber actions here
+    },
+  },
+  airlines: {
+    url: "https://www.delta.com",
+    actions: {
+      checkIn: airlineCheckIn,
+      searchFlights: airlineSearchFlights,
+      // Add other Airline actions here
+    },
+  },
+  instacart: {
+    url: "https://www.instacart.com",
+    actions: {
+      order: instacartOrder,
+      // Add other Instacart actions here
+    },
+  },
+};
+
+Dependencies:
+- Playwright: Already used in the project, will be used for web automation.
+- TypeScript: The project is already using TypeScript, so new implementations will follow the same.

@@ -1,0 +1,6 @@
+- [ ] Uber: Book (pickup, dropoff, type) -> ID (Unable to verify due to missing implementation)
+- [ ] Uber: Check how far (ID) -> Obj (Pending verification)
+- [ ] Delta / United: Check_in (booking_reference, last_name) -> Success / Fail (Pending verification)
+- [ ] Delta / United: Search_flights (origin, destination, departure_date, return_date, class) -> List (Pending verification)
+- [ ] Instacart: Order (query) (Pending verification)
+- [ ] Instacart: Check how far (Pending verification)

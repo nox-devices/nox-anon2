@@ -1,0 +1,16 @@
+Missing Implementations:
+
+1. Uber: Book (pickup, dropoff, type) -> ID
+   - Functionality not found in run-typescript directory
+
+2. Uber: Check how far (ID) -> Obj
+   - Functionality not found in run-typescript directory
+
+3. Delta / United: Check_in (booking_reference, last_name) -> Success / Fail
+   - Functionality not found in run-typescript directory
+
+4. Delta / United: Search_flights (origin, destination, departure_date, return_date, class) -> List
+   - Functionality not found in run-typescript directory
+
+5. Instacart: Order (query)
+   - Functionality not found in run-typescript directory
