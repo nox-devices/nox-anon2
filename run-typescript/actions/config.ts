@@ -1,6 +1,6 @@
 import { Page } from "playwright";
 import { linkedInCreatePost, sendMessage, linkedinSearch } from "./linkedin/linkedInCreatePost";
-import { instagramNavigateToMessages, getRecentNotification, instaSearch } from "./instagram/instagramMessage";
+import { sendInstagramMessage, getRecentNotification, instaSearch } from "./instagram/instagramMessage";
 import { amazonAddAirpodsToCart } from './amazon/amazonAddHeadphonesToCart'
 
 export const DEFAULT_APP: AppName = "instagram";
@@ -10,27 +10,38 @@ export const DO_DELETE_SESSION = false;
 
 export interface AppConfig {
   url: string;
-  action: (page: Page) => Promise<void>;
+  actions: { [key: string]: (page: Page) => Promise<void> };
+  params?: any;
 }
 
 export const APP_CONFIG: { [key: string]: AppConfig } = {
   amazon: {
     url: "https://www.amazon.com",
-    action: amazonAddAirpodsToCart,
+    actions: {
+      addAirpodsToCart: (page: Page, params?: any) => amazonAddAirpodsToCart(page, params),
+      // Add other Amazon actions here
+    },
   },
   instagram: {
     url: "https://www.instagram.com",
-    action: instaSearch,
+    actions: {
+      sendInstagramMessage: (page: Page, params?: any) => sendInstagramMessage(page, params),
+      getRecentNotification: (page: Page, params?: any) => getRecentNotification(page, params),
+      instaSearch: (page: Page, params?: any) => instaSearch(page, params),
+      // Add other Instagram actions here
+    },
+    params: {},
   },
   linkedin: {
     url: "https://www.linkedin.com",
-    action: linkedinSearch,
+    actions: {
+      createPost: (page: Page, params?: any) => linkedInCreatePost(page, params),
+      sendMessage: (page: Page, params?: any) => sendMessage(page, params),
+      search: (page: Page, params?: any) => linkedinSearch(page, params),
+      // Add other LinkedIn actions here
+    },
   },
-  // Add other apps here, for example:
-  // twitter: {
-  //   url: "https://twitter.com",
-  //   action: twitterPostTweet
-  // },
 };
+
 
 export type AppName = keyof typeof APP_CONFIG;

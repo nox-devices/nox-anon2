@@ -7,7 +7,13 @@ import {
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
-import { APP_CONFIG, AppName, DEFAULT_APP, DO_DELETE_SESSION } from "./actions/config";
+import {
+  APP_CONFIG,
+  AppName,
+  DEFAULT_APP,
+  DO_DELETE_SESSION,
+} from "./actions/config";
+import readline from "readline";
 
 console.log("Starting script execution...");
 
@@ -41,6 +47,11 @@ console.log(`APP: ${APP}`);
   }
 });
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
 const account = {
   app: APP,
   userId: APP_USER_ID,
@@ -53,57 +64,98 @@ const client = new Client({
 });
 console.log("Anon client created.");
 
-const main = async () => {
-  console.log(`Requesting ${account.app} session for app user id "${APP_USER_ID}"...`);
-  try {
-    console.log("Setting up Anon browser with context...");
-    const { browser } = await setupAnonBrowserWithContext(
-      client,
-      account,
-      { type: "managed", input: {} },
-    );
-    console.log("Anon browser setup complete.");
+const appList = Object.keys(APP_CONFIG).map((app, index) => {
+  return `${index + 1}: ${app} - ${Object.keys(APP_CONFIG[app].actions).join(', ')}`;
+}).join('\n');
 
-    console.log("Getting first page from browser context...");
-    const page = browser.contexts()[0].pages()[0];
-    console.log("Page acquired.");
+rl.question(`Enter the number of the app you want to run:\n${appList}\n`, (appInput) => {
+  const appIndex = parseInt(appInput) - 1;
+  const selectedApp: AppName = Object.keys(APP_CONFIG)[appIndex] as AppName;
 
-    console.log("Executing runtime script...");
-    await executeRuntimeScript({
-      client,
-      account,
-      target: { page: page },
-      initialUrl: APP_CONFIG[APP].url,
-      cleanupOptions: { closePage: true, closeBrowserContext: true },
-      run: async (page) => await APP_CONFIG[APP].action(page),
-    });
-    console.log("Runtime script execution completed.");
+  const actionList = Object.keys(APP_CONFIG[selectedApp].actions).map((action, index) => {
+    return `${index + 1}: ${action}`;
+  }).join('\n');
 
-    const accountInfo = { ownerId: APP_USER_ID, domain: account.app };
+  rl.question(`Enter the number of the action you want to run for ${selectedApp}:\n${actionList}\n`, (actionInput) => {
+    const actionIndex = parseInt(actionInput) - 1;
+    const ACTION = Object.keys(APP_CONFIG[selectedApp].actions)[actionIndex];
 
-    // Demo `getSessionStatus`
-    let sessionStatus = await client.getSessionStatus({ account: accountInfo });
-    console.log(`Client session status: ${JSON.stringify(sessionStatus)}`);
-
-    if (DO_DELETE_SESSION) {
-      const demoDeleteSession = async () => {
-        // Demo `deleteSession`
-        await client.deleteSession({ account: accountInfo });
-        console.log(`Session deleted for ${JSON.stringify(accountInfo)}`);
-
-        sessionStatus = await client.getSessionStatus({ account: accountInfo });
-        console.log(`After deleting session, client session status: ${JSON.stringify(sessionStatus)}`);
+    rl.question('Enter the parameters (as a JSON string): ', (paramsInput) => {
+      let params;
+      if (paramsInput.trim() === '') {
+        params = {};
+      } else {
+        params = JSON.parse(paramsInput);
       }
+      APP_CONFIG[selectedApp].params = params;
 
-      await demoDeleteSession();
-    }
-    console.log("Script execution finished successfully.");
-  } catch (error) {
-    console.error("Error in main function:", error);
-  }
-};
-
-console.log("Starting main function...");
-main()
-  .then(() => console.log("Script execution completed."))
-  .catch(error => console.error("Unhandled error in main:", error));
+      const main = async () => {
+        console.log(
+          `Requesting ${account.app} session for app user id "${APP_USER_ID}"...`
+        );
+        try {
+          console.log("Setting up Anon browser with context...");
+          const { browser } = await setupAnonBrowserWithContext(client, account, {
+            type: "managed",
+            input: {},
+          });
+          // const { browserContext } = await setupAnonBrowserWithContext(
+          //   client,
+          //   account,
+          //   { type: "local", input: { headless: false } },
+          // );
+      
+          console.log("Anon browser setup complete.");
+      
+          console.log("Getting first page from browser context...");
+          const page = browser.contexts()[0].pages()[0];
+          console.log("Page acquired.");
+      
+          console.log("Executing runtime script...");
+          await executeRuntimeScript({
+            client,
+            account,
+            target: { page: page },
+            initialUrl: APP_CONFIG[selectedApp].url,
+            cleanupOptions: { closePage: true, closeBrowserContext: true },
+            run: async (page) => await APP_CONFIG[selectedApp].actions[ACTION](page, APP_CONFIG[selectedApp].params),
+          });
+          console.log("Runtime script execution completed.");
+      
+          const accountInfo = { ownerId: APP_USER_ID, domain: account.app };
+      
+          // Demo `getSessionStatus`
+          let sessionStatus = await client.getSessionStatus({ account: accountInfo });
+          console.log(`Client session status: ${JSON.stringify(sessionStatus)}`);
+      
+          if (DO_DELETE_SESSION) {
+            const demoDeleteSession = async () => {
+              // Demo `deleteSession`
+              await client.deleteSession({ account: accountInfo });
+              console.log(`Session deleted for ${JSON.stringify(accountInfo)}`);
+      
+              sessionStatus = await client.getSessionSessionStatus({ account: accountInfo });
+              console.log(
+                `After deleting session, client session status: ${JSON.stringify(
+                  sessionStatus
+                )}`
+              );
+            };
+      
+            await demoDeleteSession();
+          }
+          console.log("Script execution finished successfully.");
+        } catch (error) {
+          console.error("Error in main function:", error);
+        }
+      };
+      
+      console.log("Starting main function...");
+      main()
+        .then(() => console.log("Script execution completed."))
+        .catch((error) => console.error("Unhandled error in main:", error));
+        
+      rl.close();
+    });
+  });
+});
